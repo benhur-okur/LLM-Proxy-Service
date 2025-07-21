@@ -1,0 +1,21 @@
+{
+    "models": {
+      "gpt-4o-mini": {
+        "type": "openai",
+        "default_api_key": "env:OPENAI_KEY"
+      },
+      "claude-4.0-sonnet": {
+        "type": "anthropic",
+        "default_api_key": "env:CLAUDE_KEY"
+      },
+      "gemini-2.5-flash": {
+        "type": "gemini",
+        "default_api_key": "env:GEMINI_KEY"
+      },
+      "grok": {
+        "type": "grok",
+        "default_api_key": "env:GROK_KEY"
+      }
+    }
+  }
+  
