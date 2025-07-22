@@ -13,15 +13,20 @@ def signup():
 
     username = data.get("username")
     password = data.get("password")
+    email = data.get("email")
 
-    if not username or not password:
-        return jsonify({"error": "Username and password are required"}), 400
+    if not username or not password or not email:
+        return jsonify({"error": "Username, Email and Password are required"}), 400
     
+    if User.query.filter_by(email = email).first():
+        return jsonify({"error": "Email already exists"}), 400
+
     if User.query.filter_by(username = username).first():
         return jsonify({"error": "Username already exists"}), 400
 
     hashed_password = generate_password_hash(password)
-    new_user = User(username = username, password_hash = hashed_password)
+    new_user = User(username=username, password_hash=hashed_password, email=email)
+
     db.session.add(new_user)
     db.session.commit()
     return jsonify({"message": "User created successfully"}), 201
@@ -35,15 +40,15 @@ def login():
     if data is None:
         return jsonify({"error": "No JSON received"}), 400
 
-    username = data.get("username")
     password = data.get("password")
+    email = data.get("email")
 
-    if not username or not password:
-        return jsonify({"error": "Username and password are required"}), 400
+    if not password or not email:
+        return jsonify({"error": "Email and Password are required"}), 400
 
-    user = User.query.filter_by(username = username).first()
+    user = User.query.filter_by(email = email).first()
     if not user or not check_password_hash(user.password_hash, password):
-        return jsonify({"error": "Invalid username or password"}), 401
+        return jsonify({"error": "Invalid Email or password"}), 401
     
     access_token = create_access_token(identity = str(user.id))
     return jsonify({"access_token": access_token}), 200
@@ -57,6 +62,7 @@ def get_current_user():
         return jsonify({"error": "User not found"}), 404
 
     return jsonify({
+        "email": user.email,
         "id": user.id,
         "username": user.username,
         "created_at": user.created_at.isoformat()
