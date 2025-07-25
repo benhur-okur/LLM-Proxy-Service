@@ -14,12 +14,7 @@ google_bp = make_google_blueprint(
         "https://www.googleapis.com/auth/userinfo.profile",
         "openid"
     ],
-    redirect_url=os.getenv("GOOGLE_REDIRECT_URL"),
-    #redirect_to="google_oauth.handle_google_callback",  ## bunu yeni değiştiridik
-
-    ##authorization_url_params={"prompt": "consent"}
-    #scope=["profile", "email"],
-    # redirect_url=os.getenv("GOOGLE_REDIRECT_URL")  # dikkat: burada artık default vermiyoruz
+    redirect_url=os.getenv("GOOGLE_REDIRECT_URL")
 )
 
 # Ek route'ları barındıran Flask Blueprint
@@ -89,14 +84,14 @@ def handle_google_callback():
     print("JWT Token oluşturuldu:", access_token[:50] + "...")
 
     print("=== COOKIE SET EDİLİYOR ===")
-    response = make_response(redirect("http://localhost:3000/dashboard"))
+    response = make_response(redirect("http://localhost:3000/dashboard"))  # Dashboard'a yönlendir
     
     
     # Ayrıca test için httponly=True olan bir tane daha
     response.set_cookie(
         "access_token_secure",
         access_token,
-        httponly=True,
+        httponly=False,
         secure=False,
         samesite="Lax",
         path="/",
@@ -107,5 +102,6 @@ def handle_google_callback():
     print("Response headers:", dict(response.headers))
     print("=== REDIRECT EDİLİYOR ===")
     return response
+
 
 

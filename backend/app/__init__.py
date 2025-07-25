@@ -14,11 +14,21 @@ from .routes.auth import auth_bp
 from .routes.apikeys import apikeys_bp
 from .auth.google_oauth import google_bp, google_oauth_bp
 
+from flask_cors import CORS
+from flask import Blueprint, jsonify, make_response, request, redirect, url_for
+
 
 
 def create_app():
     app = Flask(__name__)
 
+    CORS(app, 
+        supports_credentials=True, 
+        origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+        allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Cookie"],
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        expose_headers=["Set-Cookie"]
+    )
 
     jwt = JWTManager()
     logging.basicConfig(level=logging.DEBUG)
@@ -60,15 +70,7 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
 
-    from flask_cors import CORS
     #CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
-    CORS(app, 
-        supports_credentials=True, 
-        origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # Her iki adresi de ekle
-        allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Cookie"],
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        expose_headers=["Set-Cookie"]  # Cookie header'ını expose et
-    )
 
 
     with app.app_context():

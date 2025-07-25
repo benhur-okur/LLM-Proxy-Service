@@ -1,8 +1,9 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response, session, redirect
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from ..database import db
 from ..models.models import User
+
 
 
 auth_bp = Blueprint("auth", __name__)
@@ -53,7 +54,19 @@ def login():
         return jsonify({"error": "Invalid Email or password"}), 401
     
     access_token = create_access_token(identity = str(user.id))
-    return jsonify({"access_token": access_token}), 200
+    # Token'ı cookie olarak gönder
+    response = make_response(jsonify({"msg": "Login başarılı"}))
+    response.set_cookie(
+        "access_token_secure",
+        access_token,
+        httponly=False,     # JS erişemez true iken
+        secure=False,      # HTTPS'te True yap (prod için)
+        samesite="Lax",    # OAuth ile uyumlu olsun
+        path="/",
+        max_age=3600  # 1 saat geçerli 
+    )
+    return response
+    #return jsonify({"access_token": access_token}), 200
 
 @auth_bp.route("/me", methods=['GET'])
 @jwt_required()
@@ -96,6 +109,25 @@ def debug_cookies():
         "has_access_token": 'access_token' in cookies,
         "cookie_count": len(cookies)
     }), 200
+
+@auth_bp.route("/logout", methods=["POST"])
+@jwt_required(optional=True)
+def logout():
+    print("⛔ Backend logout işlemi başladı...")
+
+    # Google OAuth Token'ını kaldır
+    session.pop("google_oauth_token", None)
+
+    # Gerekirse tüm session'ı temizle
+    session.clear()
+
+    # JWT Cookie'yi temizle
+    response = make_response(jsonify({"msg": "Çıkış başarılı"}))
+    response.set_cookie("access_token_secure", "", max_age=0, path="/")
+
+    print("✅ Session ve cookie silindi.")
+    return response
+
 
 @auth_bp.route("/test-cookie", methods=['GET'])
 def test_cookie():
