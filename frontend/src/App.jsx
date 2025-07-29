@@ -1,40 +1,49 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+// src/App.jsx
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
-
-function AppContent() {
-  const { isAuthenticated } = useAuth();
-
-  if (isAuthenticated === null) {
-    return <div className="text-center p-10 text-xl">Yükleniyor...</div>;
-  }
-
-  return (
-    <Routes>
-      <Route
-        path="/"
-        element={isAuthenticated ? <Navigate to="/dashboard" /> : <Home />}
-      />
-      <Route
-        path="/dashboard"
-        element={isAuthenticated ? <Dashboard /> : <Navigate to="/" />}
-      />
-    </Routes>
-  );
-}
+import PrivateRoute from "./routes/PrivateRoute";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext"; 
+import APIKeyManager from "./pages/APIKeyManager"; 
+import ChatPage from "./pages/ChatPage"; // ✅ ChatPage import edildi
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              }
+            >
+              {/* Nested routes for the dashboard */}
+              <Route
+                path="api-keys"
+                element={
+                  <PrivateRoute>
+                    <APIKeyManager />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="chat"
+                element={
+                  <PrivateRoute>
+                    <ChatPage />
+                  </PrivateRoute>
+                }
+              />
+            </Route>
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

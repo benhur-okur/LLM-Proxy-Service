@@ -1,7 +1,7 @@
-from flask import Flask
+from flask import Flask, g
 from .database import db
 from dotenv import load_dotenv
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, verify_jwt_in_request, get_jwt_identity
 import os
 from datetime import timedelta
 import logging
@@ -16,6 +16,8 @@ from .auth.google_oauth import google_bp, google_oauth_bp
 
 from flask_cors import CORS
 from flask import Blueprint, jsonify, make_response, request, redirect, url_for
+
+from app.routes.config_models import config_models_bp
 
 
 
@@ -83,7 +85,9 @@ def create_app():
     app.register_blueprint(llm_bp, url_prefix="/api")  # reach llm proxy with -> /api/proxy
 
     app.register_blueprint(google_bp, url_prefix="/login")
-    app.register_blueprint(google_oauth_bp, url_prefix="/auth")                
+    app.register_blueprint(google_oauth_bp, url_prefix="/auth")       
+    app.register_blueprint(config_models_bp)
+         
 
 
     from flask_jwt_extended.exceptions import NoAuthorizationError
@@ -93,4 +97,20 @@ def create_app():
         print("JWT Auth Error:", e)
         return jsonify({"msg": "Missing or invalid JWT"}), 401
 
+    @app.before_request
+    def attach_user_to_global():
+        try:
+            verify_jwt_in_request(optional=True)
+            identity = get_jwt_identity()
+            if identity:
+                try:
+                    g.user_id = int(identity)
+                except ValueError:
+                    g.user_id = None
+            else:
+                g.user_id = None
+        except Exception:
+            g.user_id = None
+
+            
     return app

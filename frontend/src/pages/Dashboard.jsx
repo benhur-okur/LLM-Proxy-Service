@@ -1,96 +1,93 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from '../contexts/AuthContext';
+// src/pages/Dashboard.jsx
+import { useEffect, useState } from "react";
+import { useNavigate, Outlet, useLocation } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import Layout from "../components/Layout";
+import ChatPanel from "../components/chat/ChatPanel";
+
 
 export default function Dashboard() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const [darkMode, setDarkMode] = useState(() =>
+    document.documentElement.classList.contains("dark")
+  );
 
   useEffect(() => {
     if (isAuthenticated === false) {
-      console.log("isAuthenticated false, ana sayfaya yönlendiriliyorsun");
       navigate("/");
     }
   }, [isAuthenticated, navigate]);
 
-  // isAuthenticated null ise (kontrol devam ediyor) yükleniyor göster
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
+
   if (isAuthenticated === null) {
     return (
-      <div style={styles.loading}>
-        <p>Yükleniyor... - isAuthenticated null</p>
+      <div className="min-h-screen flex items-center justify-center font-sans text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-900">
+        <p className="text-lg animate-pulse">Yükleniyor...</p>
       </div>
     );
   }
 
-  // isAuthenticated true ama user yoksa da yükleniyor göster (örnek: veri henüz gelmedi)
   if (!user) {
     return (
-      <div style={styles.loading}>
-        <p>Yükleniyor... - user gelemedi</p>
+      <div className="min-h-screen flex items-center justify-center font-sans text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-900">
+        <p className="text-lg animate-pulse">Veri yükleniyor...</p>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Hoşgeldin, {user.username}!</h1>
-        <p style={styles.email}>📧 {user.email}</p>
+    <Layout>
+      {location.pathname === "/dashboard" ? (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-10 w-full max-w-2xl mx-auto text-center">
+          <h1 className="text-3xl font-extrabold mb-3">
+            Hoşgeldin,{" "}
+            <span className="text-blue-600 dark:text-blue-400">
+              {user.username}
+            </span>
+            !
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300 mb-8 text-lg flex items-center justify-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 inline-block text-gray-500 dark:text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 14v7m0 0H8m4 0h4"
+              />
+            </svg>
+            {user.email}
+          </p>
 
-        <button style={styles.button} onClick={logout}>
-          Çıkış Yap
-        </button>
-      </div>
-    </div>
+          <p className="text-gray-700 dark:text-gray-400">
+            Bu panelden API anahtarlarını yönetebilir, modellerle sohbet
+            edebilir ve hesap ayarlarını düzenleyebilirsin.
+          </p>
+        </div>
+      ) : (
+        <Outlet />
+      )}
+    </Layout>
   );
 }
-
-const styles = {
-  container: {
-    fontFamily: "'Inter', sans-serif",
-    minHeight: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "#f5f7fa",
-    padding: "20px",
-  },
-  card: {
-    width: "100%",
-    maxWidth: "420px",
-    backgroundColor: "#fff",
-    padding: "30px",
-    borderRadius: "12px",
-    boxShadow: "0 8px 20px rgba(0, 0, 0, 0.1)",
-    textAlign: "center",
-  },
-  title: {
-    fontSize: "24px",
-    color: "#202124",
-    marginBottom: "10px",
-  },
-  email: {
-    fontSize: "16px",
-    color: "#5f6368",
-    marginBottom: "30px",
-  },
-  button: {
-    padding: "10px 20px",
-    backgroundColor: "#4285F4",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "16px",
-    cursor: "pointer",
-    transition: "background-color 0.3s",
-  },
-  loading: {
-    minHeight: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    fontSize: "18px",
-    fontFamily: "'Inter', sans-serif",
-    color: "#555",
-  },
-};
