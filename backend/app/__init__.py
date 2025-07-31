@@ -8,8 +8,13 @@ import logging
 from .routes.llm_routes import llm_bp
 from flask_migrate import Migrate  # <- Bunu ekle
 
+
+
+
+
 # Blueprint'ler
 from .routes.ask import ask_bp
+from .routes.conversations import conversations_bp
 from .routes.auth import auth_bp
 from .routes.apikeys import apikeys_bp
 from .auth.google_oauth import google_bp, google_oauth_bp
@@ -20,6 +25,9 @@ from flask import Blueprint, jsonify, make_response, request, redirect, url_for
 from app.routes.config_models import config_models_bp
 
 
+from .models.conversation import Conversation
+from .models.message import Message
+from .models.models import User, APIKey 
 
 def create_app():
     app = Flask(__name__)
@@ -71,6 +79,8 @@ def create_app():
 
     db.init_app(app)
     jwt.init_app(app)
+    migrate = Migrate(app, db)
+
 
     #CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
@@ -87,6 +97,8 @@ def create_app():
     app.register_blueprint(google_bp, url_prefix="/login")
     app.register_blueprint(google_oauth_bp, url_prefix="/auth")       
     app.register_blueprint(config_models_bp)
+    app.register_blueprint(conversations_bp) 
+
          
 
 

@@ -1,18 +1,41 @@
-// src/components/chat/ChatMessageList.jsx
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ChatBubble from "./ChatBubble";
 
-export default function ChatMessageList({ messages }) {
+export default function ChatMessageList({ messages, streamingMessages }) {
   const containerRef = useRef(null);
+  const [isAutoScroll, setIsAutoScroll] = useState(true);
 
-  // Yeni mesaj geldikçe otomatik scroll altta olsun
+  // streamingMessages objesi boşsa boş nesne ata
+  streamingMessages = streamingMessages || {};
+
+  // Kullanıcı scroll yaptığında otomatik scroll durumunu ayarla
+  const handleScroll = () => {
+    if (!containerRef.current) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+
+    // 50 px ile alt sınır belirliyoruz, 50 px den yakınsa aşağıdayız ve otomatik scroll açık
+    const atBottom = scrollHeight - scrollTop - clientHeight < 50;
+    setIsAutoScroll(atBottom);
+  };
+
+  // messages veya streamingMessages değiştiğinde, eğer otomatik scroll aktifse aşağı kaydır
   useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    if (isAutoScroll && containerRef.current) {
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
     }
-  }, [messages]);
+  }, [messages, streamingMessages, isAutoScroll]);
 
-  if (!messages.length) {
+  // streamingMessages objesinden sadece metinleri alıp arraye çeviriyoruz
+  const streamingMsgsArray = Object.values(streamingMessages);
+
+  // Tamamlanan mesajlar + streaming mesajlar birleşik
+  const combinedMessages = [...messages, ...streamingMsgsArray];
+
+  if (!combinedMessages.length) {
     return (
       <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
         Henüz mesaj yok, başlayın!
@@ -23,12 +46,14 @@ export default function ChatMessageList({ messages }) {
   return (
     <div
       ref={containerRef}
-      className="flex flex-col h-full overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800 p-2"
+      onScroll={handleScroll}
+      className="flex flex-col h-full overflow-y-auto space-y-2 p-2"
       role="log"
       aria-live="polite"
       aria-relevant="additions"
+      tabIndex={0}
     >
-      {messages.map((msg) => (
+      {combinedMessages.map((msg) => (
         <ChatBubble key={msg.id} message={msg} />
       ))}
     </div>

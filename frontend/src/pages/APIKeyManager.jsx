@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "../axios"; // Global axios instance
+import { toast } from "react-toastify"; // en üste ekle
 
 const PROVIDERS = ["openai", "anthropic", "gemini", "grok"];
 
@@ -24,6 +25,22 @@ const APIKeyManager = () => {
     }
   };
 
+  const getDocsLink = (model) => {
+    switch (model.toLowerCase()) {
+      case "openai":
+        return "https://platform.openai.com/account/api-keys";
+      case "anthropic":
+        return "https://console.anthropic.com/settings/keys";
+      case "gemini":
+        return "https://aistudio.google.com/app/apikey";
+      case "grok":
+        return "https://openrouter.ai/";
+      default:
+        return "#";
+    }
+  };
+  
+
   const handleSave = async (model) => {
     const keyValue = apiKeys[model]?.key_value || "";
     if (!keyValue) return;
@@ -36,11 +53,36 @@ const APIKeyManager = () => {
         key_value: keyValue,
       });
 
+      console.log(`[Validate Response for ${model}]`, validateRes.data);
+
+      // ❌ Geçersiz key durumu
       if (!validateRes.data.valid) {
         setValidationStatus((prev) => ({ ...prev, [model]: "invalid" }));
+
+        // 🧠 Kullanıcıyı bilgilendirici popup mesajı
+        toast.error(
+          <>
+            <div className="text-sm font-medium">
+              <strong>{model}</strong> API anahtarı doğrulanamadı.
+            </div>
+            <div className="text-xs text-gray-300 mt-1">
+              {validateRes.data.error || "Geçersiz anahtar girdiniz."}
+            </div>
+            <a
+              href={getDocsLink(model)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-300 text-xs mt-2 inline-block"
+            >
+              {model} için geçerli bir API key alın
+            </a>
+          </>
+        );
+
         return;
       }
 
+      // ✅ Eğer key zaten varsa güncelle
       const existing = apiKeys[model];
       if (existing?.id) {
         await axios.put(`/apikeys/${existing.id}`, {
@@ -48,7 +90,7 @@ const APIKeyManager = () => {
           key_value: keyValue,
         });
       } else {
-        const res = await axios.post("/apikeys/", { //hatanın oluştugu kod bloğu
+        const res = await axios.post("/apikeys/", {
           model_name: model,
           key_value: keyValue,
         });
@@ -60,11 +102,15 @@ const APIKeyManager = () => {
 
       setValidationStatus((prev) => ({ ...prev, [model]: "valid" }));
       fetchApiKeys();
+
+      toast.success(`${model} API anahtarı başarıyla kaydedildi.`);
     } catch (err) {
       console.error("Validation error:", err);
       setValidationStatus((prev) => ({ ...prev, [model]: "error" }));
+      toast.error("Bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
     }
   };
+
 
   const handleDelete = async (model) => {
     try {
