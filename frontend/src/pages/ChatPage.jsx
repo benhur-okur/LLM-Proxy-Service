@@ -37,6 +37,7 @@ export default function ChatPage() {
   useEffect(() => {
     if (!conversationId) {
       setMessages([]);
+      setActiveModels([]);
       return;
     }
 
@@ -44,23 +45,49 @@ export default function ChatPage() {
       try {
         const res = await axios.get(`/conversations/${conversationId}`, { withCredentials: true });
         const conv = res.data;
-
+        console.log("🧠 Loaded messages from backend:", conv.messages); // modelName başarılı ve doğru şekidle ulaşıyor backend tarafından - sıknıtı yok
         const msgs = (conv.messages || []).map((msg) => ({
           id: msg.id,
           sender: msg.role,
           text: msg.content,
           timestamp: msg.created_at,
+          modelName: msg.modelName, 
         }));
 
         setMessages(msgs);
+        setActiveModels(conv.selected_models || []);
       } catch (err) {
         setMessages([]);
+        setActiveModels([]);
         console.error("Mesajlar alınamadı:", err);
       }
     };
 
     fetchMessages();
   }, [conversationId]);
+
+  useEffect(() => {
+    if (!conversationId) return; // Only save if conversation exists
+  
+    const debounceTimer = setTimeout(() => {
+      const saveModels = async () => {
+        try {
+          await axios.put(
+            `/conversations/${conversationId}/models`,
+            { models: activeModels },
+            { withCredentials: true }
+          );
+          console.log("✅ Models saved:", activeModels);
+        } catch (err) {
+          console.error("❌ Modeller kaydedilemedi:", err);
+        }
+      };
+  
+      saveModels();
+    }, 500); // Wait 500ms after last change
+  
+    return () => clearTimeout(debounceTimer); // Reset timer if activeModels changes again quickly
+  }, [activeModels, conversationId]);
 
   // ✅ Yeni sohbet oluştur: context ile global listeye eklenir, sidebar anında güncellenir
   const createNewConversation = async (title) => {
@@ -75,7 +102,7 @@ export default function ChatPage() {
 
   const handleAddModel = (modelName) => {
     if (!activeModels.includes(modelName)) {
-      setActiveModels((prev) => [...prev, modelName]);
+      setActiveModels((prev) => [...prev, modelName]); // This will trigger auto-save above which setModels
     }
   };
 

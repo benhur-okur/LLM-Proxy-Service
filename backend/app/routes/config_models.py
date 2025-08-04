@@ -1,6 +1,6 @@
 # backend/app/routes/config_models.py
 from flask import Blueprint, jsonify, current_app
-from app.config import Config
+from ..config import Config
 
 config_models_bp = Blueprint("config_models", __name__)
 

@@ -2,9 +2,9 @@
 
 from flask import Blueprint, request, jsonify, g
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.database import db
-from app.models.conversation import Conversation
-from app.models.message import Message
+from ..database import db
+from ..models.conversation import Conversation
+from ..models.message import Message
 
 conversations_bp = Blueprint('conversations_bp', __name__, url_prefix='/conversations')
 
@@ -55,13 +55,14 @@ def get_conversation(conv_id):
     if not conv:
         return jsonify({"msg": "Sohbet bulunamadı"}), 404
 
-    # ✅ created_at yerine timestamp kullandık
+    #used timestamp inseatd of created_at
     messages = Message.query.filter_by(conversation_id=conv.id).order_by(Message.timestamp.asc()).all()
     msgs = []
     for msg in messages:
         msgs.append({
             'id': msg.id,
-            'role': msg.sender,               # modelde sender var
+            'role': msg.sender, # modelde sender var
+            'modelName': msg.model_name,  
             'content': msg.content,
             'created_at': msg.timestamp.isoformat()  # frontend ile uyumlu
         })
@@ -71,7 +72,8 @@ def get_conversation(conv_id):
         'title': conv.title,
         'messages': msgs,
         'created_at': conv.created_at.isoformat(),
-        'updated_at': conv.updated_at.isoformat()
+        'updated_at': conv.updated_at.isoformat(),
+        'selected_models': conv.selected_models or []
     }), 200
 
 
@@ -104,4 +106,26 @@ def get_last_conversation():
         'title': last_conv.title,
         'created_at': last_conv.created_at.isoformat(),
         'updated_at': last_conv.updated_at.isoformat(),
+    }), 200
+
+@conversations_bp.route('/<int:conv_id>/models', methods=['PUT']) # update conversation models
+@jwt_required()
+def update_conversation_models(conv_id):
+    user_id = g.user_id
+    conv = Conversation.query.filter_by(id=conv_id, user_id=user_id).first()
+    if not conv:
+        return jsonify({"msg": "Sohbet bulunamadı"}), 404
+
+    data = request.get_json() or {}
+    models = data.get("models", [])
+
+    if not isinstance(models, list):
+        return jsonify({"msg": "Modeller list formatında olmalı"}), 400
+
+    conv.selected_models = models
+    db.session.commit()
+
+    return jsonify({
+        "msg": "Modeller güncellendi",
+        "selected_models": conv.selected_models
     }), 200

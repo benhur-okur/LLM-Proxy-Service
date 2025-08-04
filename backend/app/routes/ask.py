@@ -82,7 +82,8 @@ def multi_model_chat():
         try:
             user_msg = Message(
                 conversation_id=conv.id,
-                role="user",
+                #role="user",
+                sender="user",
                 content=prompt,
                 created_at=datetime.utcnow()
             )
@@ -107,7 +108,9 @@ def multi_model_chat():
             if conv:
                 model_msg = Message(
                     conversation_id=conv.id,
-                    role="assistant",
+                    #role="assistant",
+                    sender = "model",
+                    model_name=model_name, 
                     content=response,
                     created_at=datetime.utcnow()
                 )
@@ -186,15 +189,15 @@ def multi_model_chat_stream():
                 try:
                     chunk = next(stream)
                     responses[model_name] += chunk  # cevabı biriktiriyoruz
-                    yield f"data: {json.dumps({'model': model_name, 'chunk': chunk, 'done': False})}\n\n"
+                    yield f"data: {json.dumps({'modelName': model_name, 'chunk': chunk, 'done': False})}\n\n"
                 except StopIteration:
                     done_models.add(model_name)
-                    yield f"data: {json.dumps({'model': model_name, 'done': True})}\n\n"
+                    yield f"data: {json.dumps({'modelName': model_name, 'done': True})}\n\n"
                 except Exception as e:
                     done_models.add(model_name)
-                    yield f"data: {json.dumps({'model': model_name, 'error': str(e), 'done': True})}\n\n"
+                    yield f"data: {json.dumps({'modelName': model_name, 'error': str(e), 'done': True})}\n\n"
 
-                # ✅ Tüm modeller tamamlandığında — mesajları DB'ye kaydet
+                # Tüm modeller tamamlandığında — mesajları DB'ye kaydet (chunk geldikçe kaydetmiyor yani !)
         try:
             conv = db.session.get(Conversation, conversation_id)
             if conv:
@@ -212,6 +215,7 @@ def multi_model_chat_stream():
                         assistant_msg = Message(
                             conversation_id=conv.id,
                             sender="model",
+                            model_name=model_name,  #store model name
                             content=full_reply
                         )
                         db.session.add(assistant_msg)

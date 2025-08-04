@@ -12,9 +12,9 @@ export default function ChatPanel({
   onAddModel,
   onSendPrompt,
 }) {
-  // Model taglarından biri kaldırılırsa activeModels'den çıkar
+  // modellerden biri taglerden kaldırılısa bunu useEffect(chatpage ksıımındaki) kullanarak save'le zaten o kısım backend'de db updatelerini halledicek
   const handleRemoveModel = (modelName) => {
-    setActiveModels(activeModels.filter((m) => m !== modelName));
+    setActiveModels((prev) => prev.filter((m) => m !== modelName));
   };
 
   return (

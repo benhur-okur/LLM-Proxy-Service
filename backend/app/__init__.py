@@ -22,7 +22,7 @@ from .auth.google_oauth import google_bp, google_oauth_bp
 from flask_cors import CORS
 from flask import Blueprint, jsonify, make_response, request, redirect, url_for
 
-from app.routes.config_models import config_models_bp
+from .routes.config_models import config_models_bp
 
 
 from .models.conversation import Conversation

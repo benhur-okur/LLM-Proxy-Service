@@ -52,7 +52,7 @@ export function useModelStreams({ setMessages, setStreamingMessages }) {
 
           try {
             const data = JSON.parse(jsonStr); // { model, chunk, done }
-            const modelName = data.model;
+            const modelName = data.modelName || data.model;
             const chunkText = data.chunk || "";
 
             if (!modelName) continue;

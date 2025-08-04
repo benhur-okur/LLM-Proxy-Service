@@ -24,7 +24,7 @@ export default function ChatBubble({ message }) {
     >
       {!isUser && (
         <div className="text-xs font-medium mb-1 text-gray-500 dark:text-gray-300">
-          {message.modelName || "Model"}
+          {message.modelName?.trim() ? message.modelName : "Model -!"}        
         </div>
       )}
       <div>

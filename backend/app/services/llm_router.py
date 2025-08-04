@@ -33,9 +33,6 @@ class LLMRouter:
         elif model_type == "anthropic":
             return claude_client.ask_claude(prompt, api_key, model=model_name)
         elif model_type == "gemini":
-            print("Using Gemini client with model:", model_name)
-            print("ask_gemini() ÇAĞRISI YAPILDI ")
-            print("bu API Key:", api_key, " ile ask_gemini() çağrıldı")
             return gemini_client.ask_gemini(prompt, api_key, model=model_name)
         elif model_type == "grok":
             return grok_client.ask_grok(prompt, api_key, model=model_name)

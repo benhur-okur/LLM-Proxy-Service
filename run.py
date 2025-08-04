@@ -1,7 +1,7 @@
 import os
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' ## deploy ederken değiştir !!
 
-from app import create_app
+from backend.app.__init__ import create_app
 
 app = create_app()
 
