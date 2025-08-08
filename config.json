@@ -4,17 +4,21 @@
         "type": "openai",
         "default_api_key": "env:OPENAI_KEY"
       },
-      "claude-4.0-sonnet": {
-        "type": "anthropic",
-        "default_api_key": "env:CLAUDE_KEY"
-      },
       "gemini-2.5-flash": {
         "type": "gemini",
         "default_api_key": "env:GEMINI_KEY"
       },
-      "grok": {
-        "type": "grok",
-        "default_api_key": "env:GROK_KEY"
+      "anthropic/claude-3.5-sonnet": {
+      "type": "anthropic",
+      "default_api_key": "env:OPENROUTER_KEY"
+      },
+      "mistralai/mixtral-8x7b-instruct": {
+        "type": "mistralai",
+        "default_api_key": "env:OPENROUTER_KEY"
+      },
+      "deepseek/deepseek-r1:free": {
+        "type": "deepseek",
+        "default_api_key": "env:OPENROUTER_KEY"
       }
     }
   }

@@ -1,0 +1,53 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "proxy": "http://localhost:5000",
+  "private": true,
+  "dependencies": {
+    "@fontsource/inter": "^5.2.6",
+    "@heroicons/react": "^1.0.6",
+    "@tailwindcss/forms": "^0.5.10",
+    "axios": "^1.11.0",
+    "classnames": "^2.5.1",
+    "framer-motion": "^12.23.9",
+    "js-cookie": "^3.0.5",
+    "lucide-react": "^0.530.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.23.1",
+    "react-toastify": "^11.0.5"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "http-proxy-middleware": "^3.0.5",
+    "react-scripts": "5.0.1",
+    "tailwind-scrollbar": "^3.1.0",
+    "tailwindcss": "^3.4.17"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "scripts": {
+    "start": "HTTPS=true SSL_CRT_FILE=../backend/certs/localhost+2.pem SSL_KEY_FILE=../backend/certs/localhost+2-key.pem react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+  
+}

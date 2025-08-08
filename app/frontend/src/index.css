@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Temel tema */
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  @apply bg-bgLight text-gray-900 dark:bg-gray-900 dark:text-white font-sans;
+}
+
+/* Cam (glass) yüzey yardımcı sınıfları */
+.glass {
+  @apply bg-white/60 dark:bg-gray-800/60 backdrop-blur-md;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* Gradient kenarlık efekti */
+.gradient-border {
+  position: relative;
+}
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 40%, #10B981 100%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* İnce scrollbar (plugin ile) */
+.scroll-thin {
+  @apply scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-lg px-4 py-2 bg-primary text-white hover:bg-indigo-600 transition shadow-sm;
+}
+
+.btn-ghost {
+  @apply inline-flex items-center justify-center rounded-lg px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition;
+}
