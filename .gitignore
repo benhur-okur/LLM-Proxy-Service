@@ -16,6 +16,8 @@ app/frontend/.env.local
 app/frontend/.env.development.local
 
 venv/
+/venv/
+/.venv/
 
 ###############################################################################
 #  Python / Flask backend (app/backend)                                       #
